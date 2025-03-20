@@ -30,12 +30,13 @@ pub fn ChatView() -> impl IntoView {
             move |msg: WebSocketMessage| {
                 match msg {
                     WebSocketMessage::Text(text) => {
+                        // Add the message from the assistant with animation
                         set_messages.update(|msgs| {
-                            // Add the message from the assistant
                             msgs.push_back(MessageData {
                                 id: Uuid::new_v4().to_string(),
                                 role: MessageRole::Assistant,
-                                content: text,
+                                content: text.clone(),
+                                animated: true, // Enable animation for assistant messages
                             });
                         });
                         set_is_sending.set(false);
@@ -46,6 +47,7 @@ pub fn ChatView() -> impl IntoView {
                                 id: Uuid::new_v4().to_string(),
                                 role: MessageRole::System,
                                 content: format!("Error: {}", err),
+                                animated: false,
                             });
                         });
                         set_is_sending.set(false);
@@ -73,6 +75,7 @@ pub fn ChatView() -> impl IntoView {
             id: Uuid::new_v4().to_string(),
             role: MessageRole::Human,
             content: content.clone(),
+            animated: false, // No animation for user messages
         };
 
         // Add the user message to the list
@@ -87,90 +90,67 @@ pub fn ChatView() -> impl IntoView {
         // Clear the input and set sending state
         set_input_value.set(String::new());
         set_is_sending.set(true);
+
+        // Add loading indicator message
+        set_messages.update(|msgs| {
+            msgs.push_back(MessageData {
+                id: Uuid::new_v4().to_string() + "-loading",
+                role: MessageRole::System,
+                content: "Waiting for response...".to_string(),
+                animated: false,
+            });
+        });
     });
+
+    // Effect to remove loading indicator when response arrives
+    create_effect(move |_| {
+        let sending = is_sending.get();
+
+        if !sending {
+            set_messages.update(|msgs| {
+                // Remove any loading indicator messages
+                msgs.retain(|msg| !msg.id.ends_with("-loading"));
+            });
+        }
+    });
+
     view! {
-        <div class ="chat-container">
-            <div class = "chat-header">
+        <div class="chat-container">
+            <div class="chat-header">
                 <div class="chat-status">
                     <span class=move || {
                         if ws_status.get() == "Connected" { "status-indicator connected" }
                         else if ws_status.get().starts_with("Error") { "status-indicator error" }
                         else { "status-indicator disconnected" }
                     }></span>
-                <span>{move || ws_status.get()}</span>
+                    <span>{move || ws_status.get()}</span>
                 </div>
             </div>
-            <div class = "messages-wrapper">
-                <div class = "messages-container">
-                <For
-                    each = move || messages.get()
-                    key = |message| message.content.clone()
-                    children = move |content| {
-                        view! {
-                            <Message
-                                role=content.role
-                                content = content.content
-                            />
+            <div class="messages-wrapper">
+                <div class="messages-container" id="messages-container">
+                    <For
+                        each=move || messages.get()
+                        key=|message| message.id.clone()
+                        children=move |msg| {
+                            view! {
+                                <Message
+                                    role=msg.role
+                                    content=msg.content
+                                    animated=msg.animated
+                                />
+                            }
                         }
-                    }
-                />
+                    />
                 </div>
             </div>
             <div class="input-container">
                 <ChatInput
-                        value=input_value
-                        set_value=set_input_value
-                        on_send=send_message
-                        is_disabled=is_sending
-                    />
+                    value=input_value
+                    set_value=set_input_value
+                    on_send=send_message
+                    is_disabled=is_sending
+                />
             </div>
         </div>
     }
-    // view! {
-    //     <div class="chat-container">
-    //         <div class="chat-status">
-    //             <span class=move || {
-    //                 if ws_status.get() == "Connected" { "status-indicator connected" }
-    //                 else if ws_status.get().starts_with("Error") { "status-indicator error" }
-    //                 else { "status-indicator disconnected" }
-    //             }></span>
-    //             <span>{move || ws_status.get()}</span>
-    //         </div>
-
-    //         <div class="messages-container">
-    //             <For
-    //                 each=move || messages.get().into_iter().collect::<Vec<_>>()
-    //                 key=|message| message.id.clone()
-    //                 children=move |message| {
-    //                     view! {
-    //                         <Message
-    //                             role=message.role
-    //                             content=message.content
-    //                         />
-    //                     }
-    //                 }
-    //             />
-
-    //             // Show a loading indicator when waiting for a response
-    //             {move || if is_sending.get() {
-    //                 view! {
-    //                     <div class="message-loading">
-    //                         <div class="loading-dot"></div>
-    //                         <div class="loading-dot"></div>
-    //                         <div class="loading-dot"></div>
-    //                     </div>
-    //                 }
-    //             } else {
-    //                 view! { <div></div> }
-    //             }}
-    //         </div>
-
-    //         <ChatInput
-    //             value=input_value
-    //             set_value=set_input_value
-    //             on_send=send_message
-    //             is_disabled=is_sending
-    //         />
-    //     </div>
-    // }
 }

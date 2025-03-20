@@ -302,31 +302,90 @@
             transition: background-color 0.2s;
         }
 
-        .send-button:hover {
-            background-color: #4c56d2;
+            .send-button:hover {
+                background-color: #4c56d2;
+            }
+        
+            .send-button:disabled {
+                background-color: #9ca3af;
+                cursor: not-allowed;
+            }
+        
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .message {
+                    max-width: 90%;
+                }
+                
+                .chat-container {
+                    height: calc(100vh - 150px);
+                }
+            }
+            .typing {
+        position: relative;
+    }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: var(--color-primary);
+            animation: blink 1s infinite;
+            margin-left: 2px;
+            vertical-align: middle;
         }
 
-        .send-button:disabled {
-            background-color: #9ca3af;
-            cursor: not-allowed;
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .message {
-                max-width: 90%;
-            }
-            
-            .chat-container {
-                height: calc(100vh - 150px);
-            }
+        /* Message container scrolling behavior */
+        .messages-container {
+            height: 100%;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            scroll-behavior: smooth;
         }
-    </style>
-<link rel="modulepreload" href="/leptos-chat-client-35a5c57ee1d7701c.js" crossorigin="anonymous" integrity="sha384-aIBSRGTPMN2TW/XTE4mcfLt4B8y/EQueqYxYOtUYugAo9aAhCb/nUfFsf2SZgMwt"><link rel="preload" href="/leptos-chat-client-35a5c57ee1d7701c_bg.wasm" crossorigin="anonymous" integrity="sha384-7NLa1SLtKnaSOKBKsskp9UGTVWhcJHW2XXdQ3u7Q8yas96DH0gm4AiUqn15cuSlS" as="fetch" type="application/wasm"></head>
-<body>
+
+        /* Loading indicator for when waiting for a message */
+        .message-system:has(p:contains("Waiting for response...")) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-secondary);
+            padding: 0.5rem 1rem;
+        }
+
+        .message-system:has(p:contains("Waiting for response..."))::after {
+            content: '';
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid var(--color-primary);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Make sure new messages are always visible */
+        .message:last-child {
+            scroll-margin-bottom: 100px;
+        }
+            </style>
+        <link rel="modulepreload" href="/leptos-chat-client-bdd2de1352d1e06f.js" crossorigin="anonymous" integrity="sha384-tqmnvi+lUvFGjnerM2YBI7VHPTsagdK9/e2F+JHnBuR0LT5A2qn2m7I/gBEOraeO"><link rel="preload" href="/leptos-chat-client-bdd2de1352d1e06f_bg.wasm" crossorigin="anonymous" integrity="sha384-uHvQTVuLCT+E5PZaeBfVnxOLUwxh27wyDGodrqjKSGj1rcFGwRVdHb0eqrEGLHDh" as="fetch" type="application/wasm"></head>
+        <body>
 <script type="module">
-import init, * as bindings from '/leptos-chat-client-35a5c57ee1d7701c.js';
-const wasm = await init({ module_or_path: '/leptos-chat-client-35a5c57ee1d7701c_bg.wasm' });
+import init, * as bindings from '/leptos-chat-client-bdd2de1352d1e06f.js';
+const wasm = await init({ module_or_path: '/leptos-chat-client-bdd2de1352d1e06f_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -464,4 +523,4 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 })()
 </script></body>
-</html>
+        </html>
