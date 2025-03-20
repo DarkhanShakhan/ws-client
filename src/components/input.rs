@@ -17,7 +17,7 @@ pub fn ChatInput(
         // Auto resize the textarea
         if let Some(textarea) = input_ref.get() {
             // Set new height based on scroll height
-            let textarea = textarea.style("heigh", "auto");
+            let textarea = textarea.style("height", "auto");
             let scroll_height = textarea.scroll_height();
             let _ = textarea.style("height", format!("{}px", scroll_height));
         }
@@ -31,9 +31,10 @@ pub fn ChatInput(
             if !is_disabled.get() && !value.get().trim().is_empty() {
                 on_send.call(value.get());
 
+                set_value.set(String::new());
                 // Reset the textarea height
                 if let Some(textarea) = input_ref.get() {
-                    let _ = textarea.style("height", "56px");
+                    let _ = textarea.style("height", "auto");
                 }
             }
         }
@@ -46,7 +47,7 @@ pub fn ChatInput(
 
             // Reset the textarea height
             if let Some(textarea) = input_ref.get() {
-                let _ = textarea.style("height", "56px");
+                let _ = textarea.style("height", "auto");
             }
         }
     };

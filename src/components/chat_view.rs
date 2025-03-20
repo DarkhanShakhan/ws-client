@@ -88,7 +88,6 @@ pub fn ChatView() -> impl IntoView {
         ws.send_text(&content);
 
         // Clear the input and set sending state
-        set_input_value.set(String::new());
         set_is_sending.set(true);
 
         // Add loading indicator message
