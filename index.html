@@ -382,5 +382,85 @@
         }
             </style>
         </head>
-        <body></body>
+        <body>
+            <script>
+                // Add this script to your index.html before the closing body tag
+
+// Automatically scroll to the bottom when new messages are added
+const scrollToBottom = () => {
+    const messagesContainer = document.getElementById('messages-container');
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+};
+
+// Create an observer to watch for changes in the messages container
+const createMessageObserver = () => {
+    // Wait for the messages container to be available
+    const checkForMessagesContainer = setInterval(() => {
+        const messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            clearInterval(checkForMessagesContainer);
+            
+            // Set up the observer
+            const observer = new MutationObserver((mutations) => {
+                scrollToBottom();
+            });
+            
+            // Start observing
+            observer.observe(messagesContainer, { 
+                childList: true,
+                subtree: true 
+            });
+            
+            // Initial scroll
+            scrollToBottom();
+        }
+    }, 100);
+};
+
+// Set up typing effect
+const setupTypingEffect = () => {
+    // Add a method to the window object that can be called by the Rust code
+    window.startTypingAnimation = (elementId, text, speed = 30) => {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        let index = 0;
+        let currentText = '';
+        
+        const type = () => {
+            if (index < text.length) {
+                const char = text.charAt(index);
+                currentText += char;
+                element.innerHTML = currentText + '<span class="cursor">|</span>';
+                
+                // Determine delay for next character
+                let delay = speed;
+                if ([' ', '.', ',', '!', '?', ';', ':', '\n'].includes(char)) {
+                    delay += 20; // Slightly longer pause at punctuation and spaces
+                }
+                
+                index++;
+                setTimeout(type, delay);
+            } else {
+                // Animation complete
+                element.innerHTML = currentText;
+                element.classList.remove('typing');
+            }
+        };
+        
+        // Start typing
+        type();
+    };
+};
+
+// Initialize when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    createMessageObserver();
+    setupTypingEffect();
+});
+            </script>
+
+        </body>
         </html>
