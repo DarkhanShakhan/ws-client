@@ -90,15 +90,18 @@ pub fn ChatView() -> impl IntoView {
     });
     view! {
         <div class ="chat-container">
-            <div class="chat-status">
-                <span class=move || {
-                    if ws_status.get() == "Connected" { "status-indicator connected" }
-                    else if ws_status.get().starts_with("Error") { "status-indicator error" }
-                    else { "status-indicator disconnected" }
-                }></span>
+            <div class = "chat-header">
+                <div class="chat-status">
+                    <span class=move || {
+                        if ws_status.get() == "Connected" { "status-indicator connected" }
+                        else if ws_status.get().starts_with("Error") { "status-indicator error" }
+                        else { "status-indicator disconnected" }
+                    }></span>
                 <span>{move || ws_status.get()}</span>
+                </div>
             </div>
-            <div class = "messages-container">
+            <div class = "messages-wrapper">
+                <div class = "messages-container">
                 <For
                     each = move || messages.get()
                     key = |message| message.content.clone()
@@ -111,6 +114,9 @@ pub fn ChatView() -> impl IntoView {
                         }
                     }
                 />
+                </div>
+            </div>
+            <div class="input-container">
                 <ChatInput
                         value=input_value
                         set_value=set_input_value
